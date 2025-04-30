@@ -1,1 +1,1 @@
-# amr_prediction
+# amrprediction
