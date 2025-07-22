@@ -1,4 +1,4 @@
-# AMR Prediction: Machine Learning Pipeline for Genome-Based Antimicrobial Resistance Prediction
+Machine Learning Predicts Antimicrobial Resistance from Genomic Data across ESKAPEE Pathogens
 
 ### 📖 Description of the Study
 
