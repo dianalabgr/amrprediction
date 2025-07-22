@@ -1,4 +1,4 @@
-##Machine Learning Predicts Antimicrobial Resistance from Genomic Data across ESKAPEE Pathogens
+## Machine Learning Predicts Antimicrobial Resistance from Genomic Data across ESKAPEE Pathogens
 
 ### 📖 Description of the Study
 
