@@ -34,7 +34,7 @@ This repository includes:
   <li> Clinical pipelines for metagenomic sample prediction</li>
 </ul>
 
-
+---
 
 ### 📂 Folder Overview (Workflow Order)
 
