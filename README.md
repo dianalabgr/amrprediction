@@ -25,12 +25,13 @@ Our work underscores the transformative potential of integrating genomics and ma
 ### 📦 Repository Contents
 
 This repository includes:
-
+<small>
 ✅ Scripts for data acquisition and preprocessing  
 ✅ Annotation tools for AMR genes, promoters, and rRNA features  
 ✅ K-mer encoding pipelines  
 ✅ Model training and evaluation scripts (Random Forest, XGBoost, DRO models)  
 ✅ Clinical pipelines for metagenomic sample prediction  
+</small>
 ---
 
 
