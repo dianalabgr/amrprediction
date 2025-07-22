@@ -1,0 +1,5 @@
+GCF_000157115.2_Escherichia_sp_3_2_53FAA_V2_genomic.fna
+GCF_000308975.1_ASM30897v2_genomic.fna
+GCF_000597845.1_ASM59784v1_genomic.fna
+GCF_000599625.1_ASM59962v1_genomic.fna
+GCF_000599645.1_ASM59964v1_genomic.fna

@@ -1,0 +1,222 @@
+# Run using: snakemake --cores 6 --keep-going
+#You should know the genera of the assembly and put the correct one
+
+import glob
+import os
+
+# Define the file that contains the assemblies
+assembly_file = "Escherichia_files.txt"
+
+# Read all assemblies from the file into a list
+assemblies = [line.strip() for line in open(assembly_file).readlines()]
+
+# Create a dictionary with keys as assemblies and values all as "Escherichia"
+assembly_to_genus = {assembly: "Escherichia" for assembly in assemblies}
+
+
+
+
+rule all:
+    input:
+        "/mnt/raid1b/kdan_data/Paper/annotation/ref_db/ref_db.pdb",
+        expand("annotated_assemblies/results/{assembly}.txt", assembly=assemblies),
+        expand("annotated_assemblies/results/{assembly}_filtered.txt", assembly=assemblies),
+        expand("annotated_assemblies/upstream_seqs/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/aligned_proteins/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/upstream_seqs_final/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/aligned_proteins_final/{assembly}", assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt"], assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt"], assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"], assembly=assemblies),
+        expand(["kmers_Escherichia/kmer_3_flattened_{assembly}_.npz"], assembly=assemblies)
+
+
+
+#################################################
+# Run Blast Search using Database
+#################################################
+rule blastx_routines:
+    input:
+        "/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}"
+    output:
+        "annotated_assemblies/results/{assembly}.txt"
+    params:
+        "/mnt/raid1b/kdan_data/Paper/annotation/ref_db/ref_db"
+    threads:
+        5
+    log:
+        "logs/blastx_routines/{assembly}.log"
+    resources:
+        time=240  # Allocate 7200 seconds (2 hours) for this rule to run
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/blastx -query {input} \
+       -db {params} -outfmt \"6 std qseq sseq slen\" -evalue 1e-50 \
+       -out {output} -num_threads {threads} 2> {log}"
+
+
+#################################################
+# Keep the best matching
+#################################################
+rule keep_best_matching:
+    input:
+        script="/mnt/raid1b/kdan_data/Paper/scripts/keep_best_matching_new.py",
+        fasta="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}",
+        results="annotated_assemblies/results/{assembly}.txt",
+    output:
+        "annotated_assemblies/results/{assembly}_filtered.txt"
+    params:
+        db="/mnt/raid1b/kdan_data/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+    log:
+        "logs/filter_matches/{assembly}.log"
+    shell:
+        "python {input.script} --file {input.results} --fasta {input.fasta} --output {output} --db {params.db} 2> {log}"
+
+
+#################################################
+# Get 300 nt upstream of matching start site
+#################################################
+rule get_upstream_sequences:
+    input:
+        script = "/mnt/raid1b/kdan_data/Paper/scripts/get_upstream_seqs.R",
+        assembly = "/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}",
+        coordinates = "annotated_assemblies/results/{assembly}_filtered.txt"
+    output:
+        dna  = "annotated_assemblies/upstream_seqs/{assembly}",
+        prot = "annotated_assemblies/aligned_proteins/{assembly}"
+    log:
+        "logs/upstream_sequences/{assembly}.log"
+    shell:
+        "Rscript {input.script} {input.assembly} {input.coordinates} {output.dna} {output.prot} 2> {log}"
+        #  \ && rm -rf results/{wildcards.assembly}.txt"
+
+
+#################################################
+# Add missing gene names in fasta file
+#################################################
+# For Upstream sequences
+rule add_missing_records_upstream:
+    input:
+        "annotated_assemblies/upstream_seqs/{assembly}",
+        "/mnt/raid1b/kdan_data/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+    output:
+        "annotated_assemblies/upstream_seqs_final/{assembly}"
+    log:
+        script="logs/add_missing_records_upstream/{assembly}.txt"
+    script:
+       "/mnt/raid1b/kdan_data/Paper/scripts/add_empty_records_upstreams.py"
+
+# For proteins alignments
+rule add_missing_records_proteins:
+    input:
+        "annotated_assemblies/aligned_proteins/{assembly}",
+        "/mnt/raid1b/kdan_data/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+    output:
+        "annotated_assemblies/aligned_proteins_final/{assembly}"
+    log:
+        script="logs/add_missing_fasta2/{assembly}.txt"
+    script:
+       "/mnt/raid1b/kdan_data/Paper/scripts/add_empty_records_proteins.py"
+
+
+# Make blastn between assemblies and each database of 5S rRNA genes
+rule blastn_routines_5S_assembly:
+    input:
+        assembly="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt"
+    params:
+        genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
+        reference_dir="/mnt/raid1b/kdan_data/Paper/annotation/annotation/rRNA_genes/results_5s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_5S_assembly/{assembly}.txt"
+    script:
+        "/mnt/raid1b/kdan_data/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        
+
+# Make blastn between assemblies and each database of 16S rRNA genes
+rule blastn_routines_16S_assembly:
+    input:
+        assembly="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt"
+    params:
+        genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
+        reference_dir="/mnt/raid1b/kdan_data/Paper/annotation/annotation/rRNA_genes/results_16s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_16S_assembly/{assembly}.txt"
+    script:
+        "/mnt/raid1b/kdan_data/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        
+        
+
+# Make blastn between assemblies and each database of 16S rRNA genes
+rule blastn_routines_23S_assembly:
+    input:
+        assembly="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"
+    params:
+        genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
+        reference_dir="/mnt/raid1b/kdan_data/Paper/annotation/annotation/rRNA_genes/results_23s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_23S_assembly/{assembly}.txt"
+    script:
+        "/mnt/raid1b/kdan_data/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        
+
+#Find the kmers of the new assemblies 
+rule kmer_find_newAssemblies:
+    input:
+        assembly="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}",
+        path_dna="annotated_assemblies/upstream_seqs_final/{assembly}",
+        path_protein="annotated_assemblies/aligned_proteins_final/{assembly}",
+        path_5s="annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt",
+        path_16s="annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt",
+        path_23s="annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"
+    output:
+        # Define an output file to track rule completion
+        output_file="kmers_Escherichia/kmer_3_flattened_{assembly}_.npz"
+    params:
+        # Other parameters can be specified here
+        directory="kmers_Escherichia/",
+    shell:
+        """
+        python /mnt/raid1b/kdan_data/Paper/scripts/kmer_find_newAssemblies.py \
+        --assembly "{input.assembly}" \
+        --kmer_size 3 \
+        --path_dna "{input.path_dna}" \
+        --path_protein "{input.path_protein}" \
+        --path_5s "{input.path_5s}" \
+        --path_16s "{input.path_16s}" \
+        --path_23s "{input.path_23s}" \
+        --directory "{params.directory}"
+        
+        python /mnt/raid1b/kdan_data/Paper/scripts/kmer_find_newAssemblies.py \
+        --assembly "{input.assembly}" \
+        --kmer_size 4 \
+        --path_dna "{input.path_dna}" \
+        --path_protein "{input.path_protein}" \
+        --path_5s "{input.path_5s}" \
+        --path_16s "{input.path_16s}" \
+        --path_23s "{input.path_23s}" \
+        --directory "{params.directory}"
+        
+        python /mnt/raid1b/kdan_data/Paper/scripts/kmer_find_newAssemblies.py \
+        --assembly "{input.assembly}" \
+        --kmer_size 5 \
+        --path_dna "{input.path_dna}" \
+        --path_protein "{input.path_protein}" \
+        --path_5s "{input.path_5s}" \
+        --path_16s "{input.path_16s}" \
+        --path_23s "{input.path_23s}" \
+        --directory "{params.directory}"
+        
+        """
+
+

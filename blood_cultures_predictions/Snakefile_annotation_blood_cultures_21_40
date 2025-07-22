@@ -1,0 +1,227 @@
+# Run using: snakemake --cores 6 --keep-going
+
+import glob
+import os
+
+# Define the file that contains the assemblies
+assembly_file = "Petinaki_files_21_40.txt"
+
+# Read all assemblies from the file into a list
+with open(assembly_file, "r") as f:
+    lines = f.readlines()
+    # Skip the header line and extract sample names and species
+    assemblies = [line.split()[1] for line in lines[1:]]  # Extract sample names (BC1, BC2, etc.)
+    species = [line.split()[2] for line in lines[1:]]  # Extract species (Escherichia coli, Staphylococcus aureus, etc.)
+
+# Create a dictionary with keys as assemblies and values as the genus (first word of the species)
+assembly_to_genus = {assembly: species.split()[0] for assembly, species in zip(assemblies, species)}
+
+# Print the sample names and the assembly_to_genus dictionary for verification
+print("Sample Names:", assemblies)
+print("Assembly to Genus Mapping:", assembly_to_genus)
+
+rule all:
+    input:
+        "/data/dorothy/Paper/annotation/ref_db/ref_db.pdb",
+        expand("annotated_assemblies/results/{assembly}.txt", assembly=assemblies),
+        expand("annotated_assemblies/results/{assembly}_filtered.txt", assembly=assemblies),
+        expand("annotated_assemblies/upstream_seqs/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/aligned_proteins/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/upstream_seqs_final/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/aligned_proteins_final/{assembly}", assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt"], assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt"], assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"], assembly=assemblies),
+        expand(["kmers/kmer_3_flattened_{assembly}.fasta_.npz"], assembly=assemblies)
+
+
+
+#################################################
+# Run Blast Search using Database
+#################################################
+rule blastx_routines:
+    input:
+        "/data/dorothy/amr_ML/petinaki_bc/blood_assemblies_21_40/{assembly}.fasta"
+    output:
+        "annotated_assemblies/results/{assembly}.txt"
+    params:
+        "/data/dorothy/Paper/annotation/ref_db/ref_db"
+    threads:
+        5
+    log:
+        "logs/blastx_routines/{assembly}.log"
+    resources:
+        time=240  # Allocate 7200 seconds (2 hours) for this rule to run
+    shell:
+       "/data/dorothy/Paper/tools/ncbi-blast-2.15.0+/bin/blastx -query {input} \
+       -db {params} -outfmt \"6 std qseq sseq slen\" -evalue 1e-50 \
+       -out {output} -num_threads {threads} 2> {log}"
+
+
+#################################################
+# Keep the best matching
+#################################################
+rule keep_best_matching:
+    input:
+        script="/data/dorothy/Paper/scripts/keep_best_matching_final.py",
+        fasta="/data/dorothy/amr_ML/petinaki_bc/blood_assemblies_21_40/{assembly}.fasta",
+        results="annotated_assemblies/results/{assembly}.txt",
+    output:
+        "annotated_assemblies/results/{assembly}_filtered.txt"
+    params:
+        db="/data/dorothy/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+    log:
+        "logs/filter_matches/{assembly}.log"
+    shell:
+        "python {input.script} --file {input.results} --fasta {input.fasta} --output {output} --db {params.db} 2> {log}"
+
+
+#################################################
+# Get 300 nt upstream of matching start site
+#################################################
+rule get_upstream_sequences:
+    input:
+        script = "/data/dorothy/Paper/scripts/get_upstream_seqs.R",
+        assembly = "//data/dorothy/amr_ML/petinaki_bc/blood_assemblies_21_40/{assembly}.fasta",
+        coordinates = "annotated_assemblies/results/{assembly}_filtered.txt"
+    output:
+        dna  = "annotated_assemblies/upstream_seqs/{assembly}",
+        prot = "annotated_assemblies/aligned_proteins/{assembly}"
+    log:
+        "logs/upstream_sequences/{assembly}.log"
+    shell:
+        """Rscript -e 'cat(R.version.string, "\\n")'
+        Rscript {input.script} {input.assembly} {input.coordinates} {output.dna} {output.prot} 2> {log}"""
+        #  \ && rm -rf results/{wildcards.assembly}.txt"
+
+
+#################################################
+# Add missing gene names in fasta file
+#################################################
+# For Upstream sequences
+rule add_missing_records_upstream:
+    input:
+        "annotated_assemblies/upstream_seqs/{assembly}",
+        "/data/dorothy/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+    output:
+        "annotated_assemblies/upstream_seqs_final/{assembly}"
+    log:
+        script="logs/add_missing_records_upstream/{assembly}.txt"
+    script:
+       "/data/dorothy/Paper/scripts/add_empty_records_upstreams.py"
+
+# For proteins alignments
+rule add_missing_records_proteins:
+    input:
+        "annotated_assemblies/aligned_proteins/{assembly}",
+        "/data/dorothy/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+    output:
+        "annotated_assemblies/aligned_proteins_final/{assembly}"
+    log:
+        script="logs/add_missing_fasta2/{assembly}.txt"
+    script:
+       "/data/dorothy/Paper/scripts/add_empty_records_proteins.py"
+
+
+# Make blastn between assemblies and each database of 5S rRNA genes
+rule blastn_routines_5S_assembly:
+    input:
+        assembly="/data/dorothy/amr_ML/petinaki_bc/blood_assemblies_21_40/{assembly}.fasta"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt"
+    params:
+        genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
+        reference_dir="/data/dorothy/Paper/annotation/annotation/rRNA_genes/results_5s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_5S_assembly/{assembly}.txt"
+    script:
+        "/data/dorothy/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        
+
+# Make blastn between assemblies and each database of 16S rRNA genes
+rule blastn_routines_16S_assembly:
+    input:
+        assembly="/data/dorothy/amr_ML/petinaki_bc/blood_assemblies_21_40/{assembly}.fasta"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt"
+    params:
+        genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
+        reference_dir="/data/dorothy/Paper/annotation/annotation/rRNA_genes/results_16s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_16S_assembly/{assembly}.txt"
+    script:
+        "/data/dorothy/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        
+        
+
+# Make blastn between assemblies and each database of 16S rRNA genes
+rule blastn_routines_23S_assembly:
+    input:
+        assembly="/data/dorothy/amr_ML/petinaki_bc/blood_assemblies_21_40/{assembly}.fasta"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"
+    params:
+        genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
+        reference_dir="/data/dorothy/Paper/annotation/annotation/rRNA_genes/results_23s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_23S_assembly/{assembly}.txt"
+    script:
+        "/data/dorothy/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        
+
+#Find the kmers of the new assemblies 
+rule kmer_find_newAssemblies:
+    input:
+        assembly="/data/dorothy/amr_ML/petinaki_bc/blood_assemblies_21_40/{assembly}.fasta",
+        path_dna="annotated_assemblies/upstream_seqs_final/{assembly}",
+        path_protein="annotated_assemblies/aligned_proteins_final/{assembly}",
+        path_5s="annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt",
+        path_16s="annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt",
+        path_23s="annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"
+    output:
+        # Define an output file to track rule completion
+        output_file="kmers/kmer_3_flattened_{assembly}.fasta_.npz"
+    params:
+        # Other parameters can be specified here
+        directory="kmers/",
+    shell:
+        """
+        python /data/dorothy/Paper/scripts/kmer_find_newAssemblies.py \
+        --assembly "{input.assembly}" \
+        --kmer_size 3 \
+        --path_dna "{input.path_dna}" \
+        --path_protein "{input.path_protein}" \
+        --path_5s "{input.path_5s}" \
+        --path_16s "{input.path_16s}" \
+        --path_23s "{input.path_23s}" \
+        --directory "{params.directory}"
+        
+        python /data/dorothy/Paper/scripts/kmer_find_newAssemblies.py \
+        --assembly "{input.assembly}" \
+        --kmer_size 4 \
+        --path_dna "{input.path_dna}" \
+        --path_protein "{input.path_protein}" \
+        --path_5s "{input.path_5s}" \
+        --path_16s "{input.path_16s}" \
+        --path_23s "{input.path_23s}" \
+        --directory "{params.directory}"
+        
+        python /data/dorothy/Paper/scripts/kmer_find_newAssemblies.py \
+        --assembly "{input.assembly}" \
+        --kmer_size 5 \
+        --path_dna "{input.path_dna}" \
+        --path_protein "{input.path_protein}" \
+        --path_5s "{input.path_5s}" \
+        --path_16s "{input.path_16s}" \
+        --path_23s "{input.path_23s}" \
+        --directory "{params.directory}"
+        
+        """
+
+
