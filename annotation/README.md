@@ -17,7 +17,6 @@ python scripts/resfinder_translator.py annotation/amr_databases/resfinder_dna.fs
 ```bash
 cat annotation/protein_accessions_*/* > annotation/concatenated_fasta.fasta 
 ```
-(11.033 proteins)
 
 7. We ran `scripts/append_gene_names.ipynb` to include gene names in the fasta headers.
 python3 append_gene_name.py
@@ -37,7 +36,6 @@ cd-hit -i annotation/all_proteins.fasta -o annotation/all_proteins_cdhit.fasta -
         # -g 1     # cluster sequences into the highest similarity cluster
         # -d 50    # word_length
 ```
-(2.578 proteins) 
 
 
 10. We have ready the antimicrobial peptides. So, next step is to find matches between the antimicrobial peptides and the assemblies we downloaded, using BLASTx routine.
