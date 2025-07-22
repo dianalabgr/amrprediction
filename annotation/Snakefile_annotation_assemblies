@@ -1,0 +1,170 @@
+# Run using: snakemake --cores 6 --keep-going
+
+import glob
+import os
+
+assemblies = [os.path.basename(x) for x in glob.glob("data_acquisition/Assemblies/filtered_assemblies/*.*")]
+
+os.makedirs("annotated_assemblies/upstream_seqs/", exist_ok=True)
+os.makedirs("annotated_assemblies/aligned_proteins/", exist_ok=True)
+os.makedirs("annotated_assemblies/upstream_seqs/", exist_ok=True)
+os.makedirs("annotated_assemblies/upstream_seqs_final/", exist_ok=True)
+os.makedirs("annotated_assemblies/aligned_proteins_final/", exist_ok=True)
+os.makedirs("annotated_assemblies/rRNAs/final_5s_seqs/", exist_ok=True)
+os.makedirs("annotated_assemblies/rRNAs/final_16s_seqs/", exist_ok=True)
+os.makedirs("annotated_assemblies/rRNAs/final_23s_seqs/", exist_ok=True)
+os.makedirs("annotated_assemblies/rRNAs/final_23s_seqs/", exist_ok=True)
+
+
+rule all:
+    input:
+        "ref_db/ref_db.pdb",
+        expand("annotated_assemblies/results/{assembly}.txt", assembly=assemblies),
+        expand("annotated_assemblies/results/{assembly}_filtered.txt", assembly=assemblies),
+        expand("annotated_assemblies/upstream_seqs/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/aligned_proteins/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/upstream_seqs_final/{assembly}", assembly=assemblies),
+        expand("annotated_assemblies/aligned_proteins_final/{assembly}", assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt"], assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt"], assembly=assemblies),
+        expand(["annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"], assembly=assemblies)
+
+
+
+#################################################
+# Run Blast Search using Database
+#################################################
+rule blastx_routines:
+    priority: 80
+    input:
+        "data_acquisition/Assemblies/filtered_assemblies/{assembly}"
+    output:
+        "annotated_assemblies/results/{assembly}.txt"
+    params:
+        "ref_db/ref_db"
+    threads:
+        2
+    log:
+        "logs/blastx_routines/{assembly}.log"
+    shell:
+       "tools/ncbi-blast-2.15.0+/bin/blastx -query {input} \
+       -db {params} -outfmt \"6 std qseq sseq slen\" -evalue 1e-50 \
+       -out {output} -num_threads {threads} 2> {log}"
+
+
+#################################################
+# Keep the best matching
+#################################################
+rule keep_best_matching:
+    priority: 75
+    input:
+        script="scripts/keep_best_matching_final.py",
+        fasta="data_acquisition/Assemblies/filtered_assemblies/{assembly}",
+        results="annotated_assemblies/results/{assembly}.txt",
+    output:
+        "annotated_assemblies/results/{assembly}_filtered.txt"
+    params:
+        db="annotation/all_proteins_cdhit.fasta"
+    log:
+        "logs/filter_matches/{assembly}.log"
+    shell:
+        "python {input.script} --file {input.results} --fasta {input.fasta} --output {output} --db {params.db} 2> {log}"
+
+
+#################################################
+# Get 300 nt upstream of matching start site
+#################################################
+rule get_upstream_sequences:
+    priority: 70
+    input:
+        script = "scripts/get_upstream_seqs.R",
+        assembly = "data_acquisition/Assemblies/filtered_assemblies/{assembly}",
+        coordinates = "annotated_assemblies/results/{assembly}_filtered.txt"
+    output:
+        dna  = "annotated_assemblies/upstream_seqs/{assembly}",
+        prot = "annotated_assemblies/aligned_proteins/{assembly}"
+    log:
+        "logs/upstream_sequences/{assembly}.log"
+    shell:
+        """Rscript -e 'cat(R.version.string, "\\n")'
+        Rscript {input.script} {input.assembly} {input.coordinates} {output.dna} {output.prot} 2> {log}"""
+        #  \ && rm -rf results/{wildcards.assembly}.txt"
+
+
+#################################################
+# Add missing gene names in fasta file
+#################################################
+# For Upstream sequences
+rule add_missing_records_upstream:
+    priority: 65
+    input:
+        "annotated_assemblies/upstream_seqs/{assembly}",
+        "annotation/all_proteins_cdhit.fasta"
+    output:
+        "annotated_assemblies/upstream_seqs_final/{assembly}"
+    log:
+        script="logs/add_missing_records_upstream/{assembly}.txt"
+    script:
+       "scripts/add_empty_records_upstreams.py"
+
+# For proteins alignments
+rule add_missing_records_proteins:
+    priority: 60
+    input:
+        "annotated_assemblies/aligned_proteins/{assembly}",
+        "annotation/all_proteins_cdhit.fasta"
+    output:
+        "annotated_assemblies/aligned_proteins_final/{assembly}"
+    log:
+        script="logs/add_missing_fasta2/{assembly}.txt"
+    script:
+       "scripts/add_empty_records_proteins.py"
+
+
+# Make blastn between assemblies and each database of 5S rRNA genes
+rule blastn_routines_5S_assesmbly:
+    input:
+        assembly="data_acquisition/Assemblies/filtered_assemblies/{assembly}"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt"
+    params:
+        "annotation/rRNA_genes/results_5s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_5S_assesmbly/{assembly}.txt"
+    script:
+        "scripts/process_ribosomal_RNAs.py"
+        # "scripts/process_ribosomal_RNAs.ipynb"
+
+
+# Make blastn between assemblies and each database of 16S rRNA genes
+rule blastn_routines_16S_assesmbly:
+    input:
+        assembly="data_acquisition/Assemblies/filtered_assemblies/{assembly}"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt"
+    params:
+        "annotation/rRNA_genes/results_16s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_16S_assesmbly/{assembly}.txt"
+    script:
+        "scripts/process_ribosomal_RNAs.py"
+
+
+# Make blastn between assemblies and each database of 23S rRNA genes
+rule blastn_routines_23S_assesmbly:
+    input:
+        assembly="data_acquisition/Assemblies/filtered_assemblies/{assembly}"
+    output:
+        rRNA_seq="annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"
+    params:
+        "annotation/rRNA_genes/results_23s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_23S_assesmbly/{assembly}.txt"
+    script:
+        "scripts/process_ribosomal_RNAs.py"

@@ -1,0 +1,397 @@
+# Run using: snakemake --cores 6 --keep-going
+
+import glob
+import os
+
+
+reference_genomes = [os.path.splitext(os.path.basename(x))[0] for x in glob.glob("annotation/rRNA_genes/reference_genome/*.fasta")]
+
+
+rule all:
+    input:
+        "ref_db/ref_db.pdb",
+        expand("annotation/rRNA_genes/db_5s/{reference_genome}/{reference_genome}.ndb", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/db_16s/{reference_genome}/{reference_genome}.ndb", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/db_23s/{reference_genome}/{reference_genome}.ndb", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_5s/{reference_genome}.txt", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_16s/{reference_genome}.txt", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_23s/{reference_genome}.txt", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_5s/{reference_genome}_seqs.fasta", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_16s/{reference_genome}_seqs.fasta", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_23s/{reference_genome}_seqs.fasta", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_5s/{reference_genome}/1.fasta", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_16s/{reference_genome}/1.fasta", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_23s/{reference_genome}/1.fasta", reference_genome=reference_genomes),
+        expand("annotation/rRNA_genes/results_5s/{file}", 
+                file=[f"{ref}/db{name.replace('.fasta', '.ndb')}" for ref in reference_genomes for name in os.listdir(f"annotation/rRNA_genes/results_5s/{ref}/") if name.endswith('.fasta')]),
+        expand("annotation/rRNA_genes/results_16s/{file}", 
+                file=[f"{ref}/db{name.replace('.fasta', '.ndb')}" for ref in reference_genomes for name in os.listdir(f"annotation/rRNA_genes/results_16s/{ref}/") if name.endswith('.fasta')]),
+        expand("annotation/rRNA_genes/results_23s/{file}",
+                file=[f"{ref}/db{name.replace('.fasta', '.ndb')}" for ref in reference_genomes for name in os.listdir(f"annotation/rRNA_genes/results_23s/{ref}/") if name.endswith('.fasta')])
+
+
+
+#################################################
+# Build Blast Database
+#################################################
+
+rule build_blast_db:
+    priority: 85
+    input:
+        "annotation/all_proteins_cdhit.fasta"
+    params:
+        "ref_db/ref_db"
+    output:
+        "ref_db/ref_db.pdb"
+    log:
+        "logs/build_blast_db.log"
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/makeblastdb -in {input} \
+       -parse_seqids -out {params} -dbtype prot > {log}"
+
+
+#################################################
+# Run Blast Search using Database
+#################################################
+rule blastx_routines:
+    priority: 80
+    input:
+        "assemblies/{assembly}"
+    output:
+        "results/{assembly}.txt"
+    params:
+        "ref_db/ref_db"
+    threads:
+        2
+    log:
+        "logs/blastx_routines/{assembly}.log"
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/blastx -query {input} \
+       -db {params} -outfmt \"6 std qseq sseq slen\" -evalue 1e-50 \
+       -out {output} -num_threads {threads} 2> {log}"
+
+#################################################
+# Rule for blastn 16S and 23S rRNA genes
+#################################################
+
+# Build Blast Database for each 5S rRNA gene
+rule build_blast_db_5S:
+    priority: 55
+    input:
+        "annotation/rRNA_genes/5s/{reference_genome}.fna"
+    params:
+        "annotation/rRNA_genes/db_5s/{reference_genome}/{reference_genome}"
+    output:
+        "annotation/rRNA_genes/db_5s/{reference_genome}/{reference_genome}.ndb"
+    log:
+        "logs/5s_rRNA_genes_db/{reference_genome}.log"
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/makeblastdb -in {input} \
+       -parse_seqids -out {params} -dbtype nucl > {log}"
+
+
+# Build Blast Database for each 16S rRNA gene
+rule build_blast_db_16S:
+    priority: 50
+    input:
+        "annotation/rRNA_genes/16s/{reference_genome}.fna"
+    params:
+        "annotation/rRNA_genes/db_16s/{reference_genome}/{reference_genome}"
+    output:
+        "annotation/rRNA_genes/db_16s/{reference_genome}/{reference_genome}.ndb"
+    log:
+        "logs/16s_rRNA_genes_db/{reference_genome}.log"
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/makeblastdb -in {input} \
+       -parse_seqids -out {params} -dbtype nucl > {log}"
+
+
+# Build Blast Database for each 23S rRNA gene
+rule build_blast_db_23S:
+    priority: 45
+    input:
+        "annotation/rRNA_genes/23s/{reference_genome}.fna"
+    params:
+        "annotation/rRNA_genes/db_23s/{reference_genome}/{reference_genome}"
+    output:
+        "annotation/rRNA_genes/db_23s/{reference_genome}/{reference_genome}.ndb"
+    log:
+        "logs/23s_rRNA_genes_db/{reference_genome}.log"
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/makeblastdb -in {input} \
+       -parse_seqids -out {params} -dbtype nucl > {log}"
+
+
+# Run Blastn Search using 5s Databases
+rule blastn_routines_5S:
+    priority: 40
+    input:
+        fasta="annotation/rRNA_genes/reference_genome/{reference_genome}.fasta",
+        db="annotation/rRNA_genes/db_5s/{reference_genome}/{reference_genome}.ndb"
+    output:
+        "annotation/rRNA_genes/results_5s/{reference_genome}.txt"
+    params:
+        "annotation/rRNA_genes/db_5s/{reference_genome}/{reference_genome}"
+    log:
+        "logs/blastn_routines_5s/{reference_genome}.log"
+    threads:
+        4
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/blastn -query {input.fasta} \
+       -db {params} -outfmt \"6 std qseq sseq\" \
+       -out {output} -num_threads {threads} 2> {log}"
+
+
+# Run Blastn Search using 16s Databases
+rule blastn_routines_16S:
+    priority: 35
+    input:
+        fasta="annotation/rRNA_genes/reference_genome/{reference_genome}.fasta",
+        db="annotation/rRNA_genes/db_16s/{reference_genome}/{reference_genome}.ndb"
+    output:
+        "annotation/rRNA_genes/results_16s/{reference_genome}.txt"
+    params:
+        "annotation/rRNA_genes/db_16s/{reference_genome}/{reference_genome}"
+    log:
+        "logs/blastn_routines_16s/{reference_genome}.log"
+    threads:
+        4
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/blastn -query {input.fasta} \
+       -db {params} -outfmt \"6 std qseq sseq\" \
+       -out {output} -num_threads {threads} 2> {log}"
+
+
+# Run Blastn Search using 23s Databases
+rule blastn_routines_23S:
+    priority: 30
+    input:
+        fasta="annotation/rRNA_genes/reference_genome/{reference_genome}.fasta",
+        db="annotation/rRNA_genes/db_23s/{reference_genome}/{reference_genome}.ndb"
+    output:
+        "annotation/rRNA_genes/results_23s/{reference_genome}.txt"
+    params:
+        "annotation/rRNA_genes/db_23s/{reference_genome}/{reference_genome}"
+    log:
+        "logs/blastn_routines_23s/{reference_genome}.log"
+    threads:
+        4
+    shell:
+       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/blastn -query {input.fasta} \
+       -db {params} -outfmt \"6 std qseq sseq\" \
+       -out {output} -num_threads {threads} 2> {log}"
+
+
+rule get_aligned_sequence_5s:
+    priority: 25
+    input:
+        "annotation/rRNA_genes/results_5s/{reference_genome}.txt"
+    output:
+        "annotation/rRNA_genes/results_5s/{reference_genome}_seqs.fasta"
+    shell:
+        """
+        cat {input} | sort -t ' ' -k7,7nr | awk -F' ' '{{if ($3>95) {{print \">5s{wildcards.reference_genome}_copy\"NR\"\\n\"$13}}}}' > {output}
+        """
+
+rule get_aligned_sequence_16s:
+    priority: 20
+    input:
+        "annotation/rRNA_genes/results_16s/{reference_genome}.txt"
+    output:
+        "annotation/rRNA_genes/results_16s/{reference_genome}_seqs.fasta"
+    shell:
+        """
+        cat {input} | sort -t ' ' -k7,7nr | awk -F' ' '{{if ($3>95) {{print \">16s{wildcards.reference_genome}_copy\"NR\"\\n\"$13}}}}' > {output}
+        """
+
+rule get_aligned_sequence_23s:
+    priority: 15
+    input:
+        "annotation/rRNA_genes/results_23s/{reference_genome}.txt"
+    output:
+        "annotation/rRNA_genes/results_23s/{reference_genome}_seqs.fasta"
+    shell:
+        """
+        cat {input} | sort -t ' ' -k7,7nr | awk -F' ' '{{if ($3>95) {{print \">23s{wildcards.reference_genome}_copy\"NR\"\\n\"$13}}}}' > {output}
+        """
+
+rule split_fasta_records_5s:
+    priority: 10
+    input:
+        "annotation/rRNA_genes/results_5s/{reference_genome}_seqs.fasta"
+    output:
+        "annotation/rRNA_genes/results_5s/{reference_genome}/1.fasta"
+    params:
+        "annotation/rRNA_genes/results_5s/{reference_genome}/"
+    shell:
+        """
+        mkdir -p {params}
+        awk '/^>/{{s=++d\".fasta\"}} {{print > \"{params}\" s}}' {input}
+        """
+
+rule split_fasta_records_16s:
+    priority: 5
+    input:
+        "annotation/rRNA_genes/results_16s/{reference_genome}_seqs.fasta"
+    output:
+        "annotation/rRNA_genes/results_16s/{reference_genome}/1.fasta"
+    params:
+        "annotation/rRNA_genes/results_16s/{reference_genome}/"
+    shell:
+        """
+        mkdir -p {params}
+        awk '/^>/{{s=++d\".fasta\"}} {{print > \"{params}\" s}}' {input}
+        """
+
+rule split_fasta_records_23s:
+    priority: 0
+    input:
+        "annotation/rRNA_genes/results_23s/{reference_genome}_seqs.fasta"
+    output:
+        "annotation/rRNA_genes/results_23s/{reference_genome}/1.fasta"
+    params:
+        "annotation/rRNA_genes/results_23s/{reference_genome}/"
+    shell:
+        """
+        mkdir -p {params}
+        awk '/^>/{{s=++d\".fasta\"}} {{print > \"{params}\" s}}' {input}
+        """
+
+
+try :
+    dynamic_rules_5s = []
+    dictionary_fasta_number_5s = {}
+    dynamic_rules_16s = []
+    dictionary_fasta_number_16s = {}
+    dynamic_rules_23s = []
+    dictionary_fasta_number_23s = {}
+
+    for reference_genome in reference_genomes:
+        fasta_files_5s = [file for file in os.listdir(f"annotation/rRNA_genes/results_5s/{reference_genome}") if file.endswith('.fasta')]
+        fasta_files_5s = [os.path.splitext(file)[0] for file in fasta_files_5s]
+        dictionary_fasta_number_5s[reference_genome]=fasta_files_5s
+
+        fasta_files_16s = [file for file in os.listdir(f"annotation/rRNA_genes/results_16s/{reference_genome}") if file.endswith('.fasta')]
+        fasta_files_16s = [os.path.splitext(file)[0] for file in fasta_files_16s]
+        dictionary_fasta_number_16s[reference_genome]=fasta_files_16s
+
+        fasta_files_23s = [file for file in os.listdir(f"annotation/rRNA_genes/results_23s/{reference_genome}") if file.endswith('.fasta')]
+        fasta_files_23s = [os.path.splitext(file)[0] for file in fasta_files_23s]
+        dictionary_fasta_number_23s[reference_genome]=fasta_files_23s
+
+        for fasta_file in fasta_files_5s:
+            rule_names_5s = f"blastdb_5s_{reference_genome}_{fasta_file}"
+            input_path_5s = f"annotation/rRNA_genes/results_5s/{reference_genome}/{fasta_file}.fasta"
+            output_path_5s = f"annotation/rRNA_genes/results_5s/{reference_genome}/db{fasta_file}.ndb"
+            params_5s = f"annotation/rRNA_genes/results_5s/{reference_genome}/db{fasta_file}"
+
+            dynamic_rules_5s.append((rule_names_5s, input_path_5s, output_path_5s, params_5s))
+        
+        for fasta_file in fasta_files_16s:
+            rule_names_16s = f"blastdb_16s_{reference_genome}_{fasta_file}"
+            input_path_16s = f"annotation/rRNA_genes/results_16s/{reference_genome}/{fasta_file}.fasta"
+            output_path_16s = f"annotation/rRNA_genes/results_16s/{reference_genome}/db{fasta_file}.ndb"
+            params_16s = f"annotation/rRNA_genes/results_16s/{reference_genome}/db{fasta_file}"
+
+            dynamic_rules_16s.append((rule_names_16s, input_path_16s, output_path_16s, params_16s))
+            
+        for fasta_file in fasta_files_23s:
+            rule_names_23s = f"blastdb_23s_{reference_genome}_{fasta_file}"
+            input_path_23s = f"annotation/rRNA_genes/results_23s/{reference_genome}/{fasta_file}.fasta"
+            output_path_23s = f"annotation/rRNA_genes/results_23s/{reference_genome}/db{fasta_file}.ndb"
+            params_23s = f"annotation/rRNA_genes/results_23s/{reference_genome}/db{fasta_file}"
+
+            dynamic_rules_23s.append((rule_names_23s, input_path_23s, output_path_23s, params_23s))
+except:
+    pass
+
+
+# Generate a list of rules using dynamic_rules for building blast databases for 5S rRNA genes
+for rule_name_5s, input_path_5s, output_path_5s, param_5s in dynamic_rules_5s:
+    rule:
+        name: rule_name_5s
+        input:
+            input_path_5s
+        output:
+            output_path_5s
+        params:
+            param_5s
+        shell:
+            "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/makeblastdb -in {input} -parse_seqids -out {params} -dbtype nucl"
+
+
+# Generate a list of rules using dynamic_rules for building blast databases for 16S rRNA genes
+for rule_name_16s, input_path_16s, output_path_16s, param_16s in dynamic_rules_16s:
+    rule:
+        name: rule_name_16s
+        input:
+            input_path_16s
+        output:
+            output_path_16s
+        params:
+            param_16s    
+        shell:
+            "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/makeblastdb -in {input} -parse_seqids -out {params} -dbtype nucl"
+
+
+# Generate a list of rules using dynamic_rules for building blast databases for 23S rRNA genes
+for rule_name_23s, input_path_23s, output_path_23s, param_23s in dynamic_rules_23s:
+    rule:
+        name: rule_name_23s
+        input:
+            input_path_23s
+        output:
+            output_path_23s
+        params:
+            param_23s
+        shell:
+            "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/makeblastdb -in {input} -parse_seqids -out {params} -dbtype nucl"
+
+
+# Make blastn between assemblies and each database of 5S rRNA genes
+rule blastn_routines_5S_assesmbly:
+    input:
+        assembly="assemblies/{assembly}"
+    output:
+        rRNA_seq="rRNAs/final_5s_seqs/{assembly}.txt"
+    params:
+        "annotation/rRNA_genes/results_5s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_5S_assesmbly/{assembly}.txt"
+    script:
+        "scripts/process_ribosomal_RNAs.py"
+        # "scripts/process_ribosomal_RNAs.ipynb"
+
+
+# Make blastn between assemblies and each database of 16S rRNA genes
+rule blastn_routines_16S_assesmbly:
+    input:
+        assembly="assemblies/{assembly}"
+    output:
+        rRNA_seq="rRNAs/final_16s_seqs/{assembly}.txt"
+    params:
+        "annotation/rRNA_genes/results_16s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_16S_assesmbly/{assembly}.txt"
+    script:
+        "scripts/process_ribosomal_RNAs.py"
+
+
+# Make blastn between assemblies and each database of 23S rRNA genes
+rule blastn_routines_23S_assesmbly:
+    input:
+        assembly="assemblies/{assembly}"
+    output:
+        rRNA_seq="rRNAs/final_23s_seqs/{assembly}.txt"
+    params:
+        "annotation/rRNA_genes/results_23s/"
+    threads:
+        4
+    log:
+        "logs/blastn_routines_23S_assesmbly/{assembly}.txt"
+    script:
+        "scripts/process_ribosomal_RNAs.py"
