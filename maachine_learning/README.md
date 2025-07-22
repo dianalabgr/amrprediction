@@ -1,7 +1,6 @@
 # Guidelines for Machine Learning
 
-### *k*-mer
-1. We must first apply k-mer algoithm to the data to convert the sequences derived from the annotation pipeline into numerical data. To do this, we run the following command:
+1. We must first apply k-mer detection to the data to convert the sequences derived from the annotation pipeline into numerical data. To do this, we run the following command:
 
 ```bash
 cd Machine_Learning/build_dataset && python build_dataset.py && python kmer_build.py
