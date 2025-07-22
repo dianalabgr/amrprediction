@@ -31,18 +31,9 @@ This repository includes:
 ✅ K-mer encoding pipelines  
 ✅ Model training and evaluation scripts (Random Forest, XGBoost, DRO models)  
 ✅ Clinical pipelines for metagenomic sample prediction  
-✅ Example data files and SHAP outputs for interpretability
-
-For details, see the publication or the documentation inside each folder.
-
+✅ 
 ---
 
-### 🌍 Web Platform
-
-Explore predictions and feature importance interactively at:  
-👉 https://dianalab.e-ce.uth.gr/amrpredictor/
-
----
 
 ### 📂 Folder Overview (Workflow Order)
 
@@ -69,11 +60,9 @@ from data collection → annotation → machine learning → clinical metagenomi
 
 This project is under the **MIT License**.
 
-*Note: If you wish to restrict commercial use, please consider adding a non-commercial or dual-license notice.*
-
 ---
 
 ### 📫 Contact
 
 For questions, collaborations, or licensing inquiries:  
-📧 anargyros.s@dianalab.gr
+📧 skulakis@gmail.com
