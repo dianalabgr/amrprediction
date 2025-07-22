@@ -1,0 +1,166 @@
+# Run using: snakemake --use-conda --cores 6 --keep-going
+import pandas as pd
+
+
+# Load AMR data
+ndaro_path = "R/initial_datasets/NDARO_isolates.csv"
+bvbrc_path = "R/final_datasets/bv_brc_antibiograms.csv"
+narms_path = "R/final_datasets/cdc_narms_data.csv"
+
+ndaro_data = pd.read_csv(ndaro_path, on_bad_lines='skip')
+bvbrc_data = pd.read_csv(bvbrc_path, on_bad_lines='skip')
+narms_data = pd.read_csv(narms_path)
+
+
+# Get Unique values of 'Assembly' column
+ndaro_assemblies = ndaro_data['Assembly'].unique()
+BioSamples = ndaro_data['BioSample'].unique()
+
+# Get records with no Assembly IDs
+na_assemblies = ndaro_data[ndaro_data['Assembly'].isna() | (ndaro_data['Assembly'] == '')]
+na_assemblies = na_assemblies['BioSample']
+
+ndaro_assemblies = [x for x in ndaro_assemblies if pd.notnull(x)]
+
+ndaro_antibiograms = ndaro_data['BioSample'].unique()
+print("Number of unique NDARO assemblies: ", len(ndaro_assemblies))
+print("Number of unique NDARO antibiograms: ", len(ndaro_antibiograms))
+print("-------------------------")
+
+bv_brc_assemblies = bvbrc_data['Data'].unique()
+bv_brc_antibiotics = bvbrc_data['Antibiotic'].unique()
+print("Number of unique BV-BRC assemblies: ", bv_brc_assemblies.shape[0])
+print("-------------------------")
+
+narms_assemblies = narms_data['Data'].unique()
+print("Number of unique CDC NARMS assemblies: ", narms_assemblies.shape[0])
+
+
+ruleorder: NDARO_Assemblies > NDARO_NA_Assemblies > NDARO_Antibiograms > split_NDARO_Antibiotics > get_BV_BRC_Assemblies > get_BV_BRC_Antibiotics > NARMS_Assemblies
+
+
+rule all:
+    input:
+        expand("Assemblies/ndaro/{assembly}.fna", assembly=ndaro_assemblies),
+        expand("Assemblies/ndaro/{na_assembly}.fna", na_assembly=na_assemblies),
+        expand("Antibiograms/ndaro/{antibiograms}.csv", antibiograms=ndaro_antibiograms),
+        "Antibiograms/ndaro_antibiograms.csv",
+        expand("Assemblies/bv_brc/{bv_brc_assembly}.fna", bv_brc_assembly=bv_brc_assemblies),
+        "Antibiograms/bv_brc_antibiograms.csv",
+        expand("Assemblies/cdc_narms/{narms_assembly}.fna", narms_assembly=narms_assemblies)
+
+
+
+#################################################
+# Retrieve NDARO data
+#################################################
+
+# Retrieve NDARO assemblies with assembly IDs
+rule NDARO_Assemblies:
+    output:
+        "Assemblies/ndaro/{assembly}.fna"
+    log:
+        "logs/NDARO_assemblies/{assembly}.log"
+    shell:
+       "esearch -db assembly -query {wildcards.assembly} | \
+        efetch -format docsum | \
+        xtract -pattern DocumentSummary -element FtpPath_GenBank | \
+        awk 'END{{ split($1, a, /\//); print $1\"/\"a[10]\"_genomic.fna.gz\"}}' | \
+        xargs wget -nc -c -O {output}.gz 2> {log} && \
+        gunzip -c {output}.gz > {output} && rm {output}.gz"
+    
+
+# Retrieve NDARO assemblies with no assembly IDs (with SRA codes) and convert to assemblies using the SPAdes tool
+rule NDARO_NA_Assemblies:
+    output:
+        "Assemblies/ndaro/{na_assembly}.fna"
+    log:
+        "logs/NDARO_assemblies/{na_assembly}.log"
+    params:
+        "Assemblies/ndaro"
+    threads: 4
+    shell:
+       "ACC=$(efetch -db sra -id $(esearch -db biosample -query {wildcards.na_assembly} | efetch -format docsum | \
+        xtract -pattern Ids -element Id | awk '{{ for (i=1; i<=NF; i++) if($i ~ /^SR/) print $i }}') -format docsum | xtract -pattern Runs -element Run@acc) && \
+        fastq-dump --split-files --gzip -O {params}/${{ACC}}/ $ACC > {log} 2>> {log} && \
+        spades.py --only-assembler -1 {params}/${{ACC}}/${{ACC}}_1.fastq.gz -2 {params}/${{ACC}}/${{ACC}}_2.fastq.gz -m 50 -t {threads} \
+        -o {params}/${{ACC}}/ >> {log} && \
+        mv {params}/${{ACC}}/scaffolds.fasta {output} && \
+        rm -r {params}/${{ACC}}/"
+
+
+# Retrieve NDARO antibiograms
+rule NDARO_Antibiograms:
+    input:
+        "R/ndaro_data_retrieve.R"
+    output:
+        "Antibiograms/ndaro/{antibiograms}.csv"
+    conda:
+        "envs/rlang.yaml"
+    log:
+        "logs/NDARO_antibiograms/{antibiograms}.log"
+    shell:
+        "Rscript {input} {wildcards.antibiograms} >& {log}"
+
+
+# Split NDARO antibiograms. Finally, each file will contain antibiogram data of one antibiotic 
+rule split_NDARO_Antibiotics:
+    input:
+        "R/ndaro_split_antibiotics.R"
+    output:
+        "Antibiograms/ndaro_antibiograms.csv"
+    params:
+        outdir="Antibiograms/ndaro_splited_antibiograms/"
+    log:
+        "logs/ndaro_split_antibiotics.log"
+    shell:
+        "Rscript {input} {ndaro_path} {params.outdir} 2> {log}"
+
+
+
+#################################################
+# Retrieve BV BRC data
+#################################################
+
+# Retrieve BV BRC assemblies
+rule get_BV_BRC_Assemblies:
+    input:
+        "R/bv_brc_download.R"
+    output:
+        "Assemblies/bv_brc/{bv_brc_assembly}.fna"
+    log:
+        "logs/BV_BRC_Assemblies/{bv_brc_assembly}.log"
+    threads: 4
+    conda:
+        "envs/spades.yaml"
+    shell:
+       "Rscript {input} {wildcards.bv_brc_assembly} {output} {log} {threads}"
+
+
+# Split BV BRC antibiograms. Finally, each file will contain antibiogram data of one antibiotic
+rule get_BV_BRC_Antibiotics:
+    input:
+        "R/bv_brc_split_antibiotics.R"
+    output:
+        "Antibiograms/bv_brc_antibiograms.csv"
+    shell:
+        "Rscript {input} {output}"
+
+
+#################################################
+# Retrieve CDC NARMS data
+#################################################
+
+# Retrieve CDC NARMS assemblies using the Entrez System, unzip and save them
+rule NARMS_Assemblies:
+    input:
+        "R/narms_download.R"
+    output:
+        "Assemblies/cdc_narms/{narms_assembly}.fna"
+    log:
+        "logs/CDC_NARMS/assemblies/{narms_assembly}.log"
+    threads: 12
+    conda:
+        "envs/spades.yaml"
+    shell:
+       "Rscript {input} {wildcards.narms_assembly} {output} {log} {threads}"
