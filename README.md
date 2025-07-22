@@ -31,7 +31,6 @@ This repository includes:
 ✅ K-mer encoding pipelines  
 ✅ Model training and evaluation scripts (Random Forest, XGBoost, DRO models)  
 ✅ Clinical pipelines for metagenomic sample prediction  
-✅ 
 ---
 
 
