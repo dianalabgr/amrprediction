@@ -1,49 +1,48 @@
-
 # 🔬 Demo: Predicting the Antibiogram of a New Genome Assembly
 
-This demo walks you through a complete use case: predicting the **in silico antibiogram** of a publicly available genome using the pipelines provided in this repository.
+This demo walks you through a complete example using a public **Escherichia coli** genome to predict its **in silico antibiogram** using the pipelines and models in this repository.
 
 ---
 
-## 🧩 Step-by-Step Instructions
+## 📦 1. Download and Prepare Inputs
 
-### 1. Clone the Pipeline
+### 🧬 Download Genome Assembly (FASTA)
 
-Download or clone the `annotate_newAssemblies/` folder from this repository.
-
-### 2. Download the Genome (Escherichia coli)
-
-- Visit the [NCBI Genome Browser](https://www.ncbi.nlm.nih.gov/datasets/genome/?biosample=SAMN14843973)
+- Go to the [NCBI genome browser](https://www.ncbi.nlm.nih.gov/datasets/genome/?biosample=SAMN14843973)
 - Download the genome in **FASTA format**
-- Extract the file `GCA_016987635.1_PDT000967611.1_genomic.fna` into the `annotate_newAssemblies/` folder
+- Unzip `GCA_016987635.1_PDT000967611.1_genomic.fna` into the folder:  
+  `annotate_newAssemblies/`
 
-### 3. Create a File List
+### 📄 Create Input File List
 
-In `annotate_newAssemblies/`, create a file named `Escherichia_files.txt` with the following content:
+In `annotate_newAssemblies/`, create a file called `Escherichia_files.txt` with:
 
 GCA_016987635.1_PDT000967611.1_genomic.fna
 
 
 ---
 
-## 🛠 Set Up the Environment
+## 🛠 2. Prepare Annotation Resources
 
-### 4. Download Required Annotation Files
+### 📥 Download Dependencies
 
-- Download [`ProcessNewAssemblies_nedded_files.zip`](https://zenodo.org/record/16213507) from Zenodo
-- Unzip it to your working directory
+- Download [`ProcessNewAssemblies_nedded_files.zip`](https://zenodo.org/record/16213507)
+- Unzip it in your home or working directory
 
-### 5. Create rRNA Output Folders
+### 📁 Create Required Subfolders
 
-Inside the following three directories:
+Go to:
 
 ~/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/
-├── results_16s/
-├── results_23s/
-└── results_5s/
 
 
-Create these subfolders inside **each** of them:
+Inside **each of these three folders**:
+
+- `results_16s/`
+- `results_23s/`
+- `results_5s/`
+
+Create the following subfolders:
 
 Acinetobacter_baumannii/
 Enterobacter_cloacae/
@@ -54,34 +53,40 @@ Pseudomonas_aeruginosa/
 Staphylococcus_aureus/
 
 
-### 6. Update the Script Path
+> ✅ You must create **all 7 species folders** inside **each results_* folder**.
 
-Edit the file:
+---
+
+## ✏️ 3. Modify the k-mer Script
+
+Open:
 
 ~/ProcessNewAssemblies_nedded_files/scripts/kmer_find_newAssemblies.py
 
 
-At line **172**, replace the default paths with:
+At **line 172**, replace the default hardcoded paths with:
 
 ```python
 kmer_vocab_dna = np.load('~/ProcessNewAssemblies_nedded_files/Machine_Learning/build_dataset/data/kmer_'+str(kmer_size)+'_flatteneddna_stats_.npy', allow_pickle=True)
 kmer_vocab_protein = np.load('~/ProcessNewAssemblies_nedded_files/Machine_Learning/build_dataset/data/kmer_'+str(kmer_size)+'_flattenedprotein_stats_.npy', allow_pickle=True)
 kmer_vocab_rrna = np.load('~/ProcessNewAssemblies_nedded_files/Machine_Learning/build_dataset/data/kmer_'+str(kmer_size)+'_flattenedrrna_stats_.npy', allow_pickle=True)
 
-🚀 Run the Annotation Pipeline
+🚀 4. Run Annotation Pipeline
+
+Open a terminal and run:
 
 cd annotate_newAssemblies/
 snakemake --snakefile Snakefile_annotation_newAssemblies --cores 4
 
-This will annotate the genome and extract k-mers required for prediction.
-🤖 Predict the Antibiogram
-7. Load Pretrained Models
+This will annotate the genome and extract k-mer features for prediction.
+🧠 5. Predict the Antibiogram
+📥 Download Models
 
     Download models_and_shap_values.zip
 
-    Unzip it inside the predict_newAssemblies/ folder
+    Unzip it into the folder: predict_newAssemblies/
 
-8. Run the Jupyter Notebook
+📓 Run the Notebook
 
 jupyter notebook
 
@@ -89,8 +94,18 @@ jupyter notebook
 
     Run all cells to:
 
-        Load trained models
+        Load the trained models
 
-        Predict resistance profiles
+        Predict antibiotic resistance
 
-        Output the in silico antibiogram
+        View the in silico antibiogram
+
+✅ Output
+
+You will get:
+
+    A resistance profile prediction for the input genome
+
+    Confidence scores
+
+    Optional SHAP explanations for model interpretability
