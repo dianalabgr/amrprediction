@@ -46,11 +46,17 @@ results_5s/
 Create these subfolders **(inside each folder)**:
 
 Acinetobacter_baumannii/
+
 Enterobacter_cloacae/
+
 Enterococcus_faecium/
+
 Escherichia_coli/
+
 Klebsiella_pneumoniae/
+
 Pseudomonas_aeruginosa/
+
 Staphylococcus_aureus/
 
 
