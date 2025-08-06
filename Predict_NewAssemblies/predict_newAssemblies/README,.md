@@ -1,7 +1,7 @@
-To generate in silico antibiograms for the new assemblies using pre-trained models:
-1. Download Models
+This step uses pre-trained machine learning models to predict antibiotic resistance profiles for newly annotated assemblies.
+📥 Step 1: Download Models
 
-Download models_and_shap_values.zip from Zenodo and unzip it into the predict_newAssemblies/ directory.
+Download models_and_shap_values.zip from Zenodo and extract it inside the predict_newAssemblies/ folder:
 
 predict_newAssemblies/
 ├── models_and_shap_values/
@@ -9,16 +9,18 @@ predict_newAssemblies/
 │   ├── shap_values/
 │   └── ...
 
-2. Launch Jupyter Notebook
+🚀 Step 2: Launch Jupyter Notebook
 
-From your terminal, start Jupyter:
+Start Jupyter Notebook:
 
 jupyter notebook
 
-Open the notebook located in the predict_newAssemblies/ folder and run all cells to:
+Then open the notebook located in predict_newAssemblies/ and run all cells to:
 
-    Load the trained machine learning models
+    Load the trained models
 
-    Generate predictions for the assemblies
+    Process the k-mer encoded assemblies
 
-    Output the predicted antibiograms
+    Predict the antibiotic resistance profile
+
+    Output the in silico antibiogram for each sample
