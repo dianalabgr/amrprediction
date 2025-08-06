@@ -1,0 +1,42 @@
+Total number,Antibiotic,Escherichia,Escherichia_NumberOfResistantStrains,Klebsiella,Klebsiella_NumberOfResistantStrains,Acinetobacter,Acinetobacter_NumberOfResistantStrains,Staphylococcus,Staphylococcus_NumberOfResistantStrains,Pseudomonas,Pseudomonas_NumberOfResistantStrains,Enterobacter,Enterobacter_NumberOfResistantStrains,Enterococcus,Enterococcus_NumberOfResistantStrains
+amikacin,6390,2213,50,1391,480,1832,845,0,0,707,142,247,14,0,0
+amoxicillin-clavulanic acid,8197,6953,616,1244,873,0,0,0,0,0,0,0,0,0,0
+ampicillin,7081,7081,3021,0,0,0,0,0,0,0,0,0,0,0,0
+ampicillin-sulbactam,3549,259,196,1626,1570,1664,761,0,0,0,0,0,0,0,0
+azithromycin,3080,3080,26,0,0,0,0,0,0,0,0,0,0,0,0
+aztreonam,5284,2534,430,2426,2215,0,0,0,0,324,191,0,0,0,0
+cefazolin,2701,2701,1092,0,0,0,0,0,0,0,0,0,0,0,0
+cefepime,6726,3249,543,2332,1734,461,325,0,0,464,214,220,100,0,0
+cefotaxime,3022,1908,1013,1114,1072,0,0,0,0,0,0,0,0,0,0
+cefotetan,125,0,0,125,18,0,0,0,0,0,0,0,0,0,0
+cefoxitin,6388,3872,504,2384,1410,0,0,132,105,0,0,0,0,0,0
+cefpodoxime,249,158,100,91,88,0,0,0,0,0,0,0,0,0,0
+ceftazidime,9826,4141,805,3125,2577,1709,1346,0,0,580,297,271,245,0,0
+ceftriaxone,10315,5917,1226,2817,2422,1581,1460,0,0,0,0,0,0,0,0
+cefuroxime,1688,0,0,1688,1632,0,0,0,0,0,0,0,0,0,0
+chloramphenicol,3362,3132,274,230,157,0,0,0,0,0,0,0,0,0,0
+ciprofloxacin,11167,5220,1607,2559,2308,1954,1619,668,43,537,468,229,109,0,0
+clindamycin,756,0,0,0,0,0,0,756,186,0,0,0,0,0,0
+colistin,1092,381,41,380,151,331,44,0,0,0,0,0,0,0,0
+doripenem,1557,194,47,624,444,476,94,0,0,152,99,111,50,0,0
+ertapenem,5013,3292,103,1468,899,0,0,0,0,0,0,253,166,0,0
+erythromycin,732,0,0,0,0,0,0,732,337,0,0,0,0,0,0
+gentamicin,14099,7979,975,2665,1282,1883,1566,826,39,534,363,212,47,0,0
+imipenem,7525,2890,68,2218,1141,1795,666,0,0,467,380,155,70,0,0
+levofloxacin,5961,1117,962,2032,1827,1424,1112,460,126,714,497,214,98,0,0
+linezolid,834,0,0,0,0,0,0,834,25,0,0,0,0,0,0
+meropenem,12853,8100,86,2769,1261,974,517,0,0,740,413,270,86,0,0
+minocycline,372,0,0,133,45,239,42,0,0,0,0,0,0,0,0
+moxifloxacin,328,0,0,0,0,0,0,328,28,0,0,0,0,0,0
+nalidixic acid,3293,3161,174,132,63,0,0,0,0,0,0,0,0,0,0
+nitrofurantoin,1430,502,20,888,810,0,0,0,0,0,0,40,23,0,0
+oxacillin,768,0,0,0,0,0,0,768,176,0,0,0,0,0,0
+penicillin,489,0,0,0,0,0,0,489,427,0,0,0,0,0,0
+piperacillin-tazobactam,7693,4034,253,2634,1913,390,308,0,0,407,218,228,199,0,0
+sulfisoxazole,3621,3621,911,0,0,0,0,0,0,0,0,0,0,0,0
+tetracycline,11490,6814,2678,2104,1078,1562,1135,781,60,0,0,229,77,0,0
+tigecycline,907,0,0,907,42,0,0,0,0,0,0,0,0,0,0
+tobramycin,7305,2767,281,2265,1423,1610,1035,0,0,430,355,233,79,0,0
+trimethoprim,471,394,190,77,56,0,0,0,0,0,0,0,0,0,0
+trimethoprim-sulfamethoxazole,9983,6564,1234,1555,880,1604,1361,0,0,0,0,260,115,0,0
+vancomycin,892,0,0,0,0,0,0,859,0,0,0,0,0,33,11
