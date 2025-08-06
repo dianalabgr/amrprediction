@@ -1,0 +1,9 @@
+Species	Antibiotics
+escherichia	"amoxicillin-clavulanicAcid", "ampicillin", "ampicillin-sulbactam", "azithromycin", "aztreonam", "cefazolin", "cefepime", "cefotaxime", "cefoxitin", "cefpodoxime", "ceftazidime", "ceftriaxone", "chloramphenicol", "ciprofloxacin", "colistin", "doripenem", "ertapenem", "gentamicin", "imipenem", "levofloxacin", "meropenem", "nalidixic_acid", "piperacillin_tazobactam", "sulfisoxazole", "tetracycline", "tobramycin", "trimethoprim", "trimethoprim_sulfamethoxazole"
+klebsiella	"amikacin", "amoxicillin-clavulanicAcid", "cefotetan", "cefoxitin", "ceftazidime", "ceftriaxone", "chloramphenicol", "ciprofloxacin", "doripenem", "ertapenem", "gentamicin", "imipenem", "levofloxacin", "meropenem", "nalidixic_acid", "piperacillin_tazobactam", "tetracycline", "tobramycin", "trimethoprim", "trimethoprim_sulfamethoxazole"
+acinetobacter	"amikacin", "ampicillin-sulbactam", "cefepime", "ceftazidime", "ceftriaxone", "ciprofloxacin", "doripenem", "gentamicin", "imipenem", "levofloxacin", "meropenem", "minocycline", "piperacillin_tazobactam", "tetracycline", "tobramycin", "trimethoprim_sulfamethoxazole"
+pseudomonas	"amikacin", "aztreonam", "cefepime", "ceftazidime", "ciprofloxacin", "doripenem", "gentamicin", "levofloxacin", "meropenem", "piperacillin_tazobactam", "tobramycin"
+enterobacter	"cefepime", "ciprofloxacin", "doripenem", "ertapenem", "gentamicin", "imipenem", "levofloxacin", "meropenem", "tetracycline", "tobramycin", "trimethoprim_sulfamethoxazole"
+staphylococcus	"""cefoxitin"", ""ciprofloxacin"", ""clindamycin"", ""erythromycin"", ""gentamicin"", 
+    ""levofloxacin"", ""moxifloxacin"", ""oxacillin"", ""penicillin"", ""tetracycline"""
+enterococcus	""
