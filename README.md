@@ -26,7 +26,7 @@ Our work underscores the transformative potential of integrating genomics and ma
 
 Want to try it yourself? Follow our step-by-step demo to predict the antibiogram of a real NCBI genome:
 
-👉 [View the full demo instructions](./demo/README.md)
+👉 [View the full demo instructions](./demo/Readme.md)
 
 ---
 
