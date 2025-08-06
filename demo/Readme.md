@@ -94,7 +94,7 @@ This will annotate the genome and extract k-mer features for prediction.
 ---
 
 ## 5. Predict the Antibiogram
-###📥 Download Models
+### Download Models
 
     Download models_and_shap_values.zip
 
@@ -120,6 +120,4 @@ You will get:
 
     A resistance profile prediction for the input genome
 
-    Confidence scores
-
-    Optional SHAP explanations for model interpretability
+ 
