@@ -1,0 +1,19 @@
+Barcode	Sample	Species
+150	BC21	Enterococcus faecium
+153	BC23	Acinetobacter baumannii
+154	BC24	Pseudomonas aeruginosa
+155	BC25	Klebsiella pneumoniae
+156	BC26	Escherichia coli
+157	BC27	Klebsiella pneumoniae
+158	BC28	Acinetobacter baumannii
+159	BC29	Acinetobacter baumannii
+160	BC30	Klebsiella pneumoniae
+161	BC31	Acinetobacter baumannii
+162	BC32	Acinetobacter baumannii
+163	BC33	Acinetobacter baumannii
+164	BC34	Klebsiella pneumoniae
+165	BC35	Enterococcus faecium
+187	BC36	Acinetobacter baumannii
+188	BC37	Klebsiella pneumoniae (93.48%), Escherichia coli (6.05%)
+189	BC38	Klebsiella pneumoniae
+190	BC39	Acinetobacter baumannii
