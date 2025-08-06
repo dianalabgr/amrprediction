@@ -22,6 +22,13 @@ Our work underscores the transformative potential of integrating genomics and ma
 
 ---
 
+## 🔬 Demo Case
+
+Want to try it yourself? Follow our step-by-step demo to predict the antibiogram of a real NCBI genome:
+
+👉 [View the full demo instructions](./demo/README.md)
+
+
 ### 📦 Repository Contents
 
 This repository includes:
@@ -38,15 +45,17 @@ This repository includes:
 
 ### 📂 Folder Overview (Workflow Order)
 
-| Folder                   | Description                                                                                                                                     |
-|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| `data_acquisition/`     | Scripts for downloading, cleaning, and quality-controlling genome assemblies and matched antibiograms from public repositories.                 |
-| `annotation/`           | Scripts for annotating genomes with AMR genes, upstream promoters, core genes, and rRNA regions; includes redundancy filtering and clustering.  |
-| `maachine_learning/`    | Machine learning pipeline: k-mer encoding, model training (Random Forest, XGBoost), cross-validation, and evaluation across 40 antibiotics.     |
-| `blood_cultures_predictions/` | Clinical pipeline to process metagenomic blood culture samples: taxonomic identification, assembly, k-mer extraction, and AMR prediction.    |
-| `scripts/`              | Helper scripts for data formatting, statistics, figure creation, and reproducibility tasks.                                                     |
-| `DRO_models/`          | Models trained using a Distributionally Robust Optimization (DRO)-inspired strategy to improve predictions for harder antibiotics.              |
-| `annotate_newAssemblies/` | Tools to apply annotation steps on new or external assemblies, matching the training set format.                                              |
+| Folder                    | Description |
+|---------------------------|-------------|
+| `data_acquisition/`       | Scripts to download, clean, and QC genome assemblies and antibiograms from public datasets. |
+| `annotation/`             | Annotates assemblies with AMR genes, promoters, rRNAs, and core genes. Includes filtering, deduplication, and gene clustering. |
+| `machine_learning/`       | K-mer encoding, model training (Random Forest, XGBoost), and evaluation for 40 antibiotics. Also includes robust models using DRO-based strategies. |
+| `blood_cultures_predictions/` | Pipeline to process metagenomic blood culture data: from taxonomic profiling to genome assembly, k-mer extraction, and resistance prediction. |
+| `Predict_NewAssemblies/`  | Pipeline to annotate new assemblies and predict their antibiograms. Includes Snakemake workflow and Jupyter notebook for loading trained models. |
+| `annotate_newAssemblies/` | Scripts to annotate new genome assemblies using the same structure as the training data. |
+| `scripts/`                | Utility scripts for statistics, formatting, figure generation, and reproducibility. |
+| `requirements/`           | Contains `software_requirements.txt` and `R_requirements.txt` listing all packages and versions used in the study. |
+
 
 ---
 
