@@ -36,13 +36,14 @@ Go to:
 ~/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/
 
 
-Inside **each of these three folders**:
+Inside **each of the following folders**:
 
-- `results_16s/`
-- `results_23s/`
-- `results_5s/`
+results_16s/
+results_23s/
+results_5s/
 
-Create the following subfolders:
+
+Create these subfolders **(inside each folder)**:
 
 Acinetobacter_baumannii/
 Enterobacter_cloacae/
@@ -53,8 +54,7 @@ Pseudomonas_aeruginosa/
 Staphylococcus_aureus/
 
 
-
-> ✅ You must create **all 7 species folders** inside **each results_* folder**.
+✅ You must create **all 7 species folders** inside **each `results_*` folder**.
 
 ---
 
