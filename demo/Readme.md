@@ -45,19 +45,19 @@ results_5s/
 
 Create these subfolders **(inside each folder)**:
 
-Acinetobacter_baumannii/
+-Acinetobacter_baumannii/
 
-Enterobacter_cloacae/
+-Enterobacter_cloacae/
 
-Enterococcus_faecium/
+-Enterococcus_faecium/
 
-Escherichia_coli/
+-Escherichia_coli/
 
-Klebsiella_pneumoniae/
+-Klebsiella_pneumoniae/
 
-Pseudomonas_aeruginosa/
+-Pseudomonas_aeruginosa/
 
-Staphylococcus_aureus/
+-Staphylococcus_aureus/
 
 
 ✅ You must create **all 7 species folders** inside **each `results_*` folder**.
