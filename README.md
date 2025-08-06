@@ -28,6 +28,7 @@ Want to try it yourself? Follow our step-by-step demo to predict the antibiogram
 
 👉 [View the full demo instructions](./demo/README.md)
 
+---
 
 ### 📦 Repository Contents
 
