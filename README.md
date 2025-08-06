@@ -53,7 +53,6 @@ This repository includes:
 | `machine_learning/`       | K-mer encoding, model training (Random Forest, XGBoost), and evaluation for 40 antibiotics. Also includes robust models using DRO-based strategies. |
 | `blood_cultures_predictions/` | Pipeline to process metagenomic blood culture data: from taxonomic profiling to genome assembly, k-mer extraction, and resistance prediction. |
 | `Predict_NewAssemblies/`  | Pipeline to annotate new assemblies and predict their antibiograms. Includes Snakemake workflow and Jupyter notebook for loading trained models. |
-| `annotate_newAssemblies/` | Scripts to annotate new genome assemblies using the same structure as the training data. |
 | `scripts/`                | Utility scripts for statistics, formatting, figure generation, and reproducibility. |
 | `requirements/`           | Contains `software_requirements.txt` and `R_requirements.txt` listing all packages and versions used in the study. |
 
