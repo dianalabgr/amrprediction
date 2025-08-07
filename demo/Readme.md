@@ -11,12 +11,15 @@ cd amrprediction/Predict_NewAssemblies
 
 Create a Python environment (recommended):
 
-conda create -n amr_prediction_env python=3.12.7 conda activate amr_prediction_env pip install -r requirements/software_requirements.txt
+conda create -n amr_prediction_env python=3.12.7 
+
+conda activate amr_prediction_env 
+
+pip install -r requirements/software_requirements.txt
 
 ---
 
 ## 1. Download and Prepare Inputs
-### Downlaod the github repo and specifically the folder Predict_NewAssemblies which will be your working directory 
 
 ### Download Genome Assembly (FASTA)
 
