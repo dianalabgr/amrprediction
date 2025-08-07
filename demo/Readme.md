@@ -31,7 +31,9 @@ Edit the file Escherichia_files.txt in annotate_newAssemblies/ to contain only:
 
 GCA_016987635.1_PDT000967611.1_genomic.fna
 
-    ⚠️ If using a genome from a different genus, modify line 14 of Snakefile_annotation_newAssemblies accordingly.
+or if you use a different genome, the name of your genome
+
+    ⚠️ If using a genome from a different genus, you should also modify line 14 of Snakefile_annotation_newAssemblies accordingly.
 ---
 
 ## 3. Prepare Annotation Resources
