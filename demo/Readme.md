@@ -45,7 +45,7 @@ or if you use a different genome, the name of your genome
 
 #### Create Required Subfolders
 
-#### Navigate to: ~/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/
+Navigate to: ~/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/
 
 Inside each of the following folders:
 
