@@ -131,9 +131,9 @@ This will annotate the genome and extract k-mer features for prediction.
 ## 5. Predict the Antibiogram
 ### Download Models
 
-    Download models_and_shap_values.zip
+Download [`models_and_shap_values.zip](https://zenodo.org/record/16213507)
 
-    Unzip it into the folder: predict_newAssemblies/
+Unzip it into the folder: predict_newAssemblies/
 
 📓 Run the Notebook
 
