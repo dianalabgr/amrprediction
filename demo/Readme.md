@@ -112,11 +112,14 @@ This will annotate the genome and extract k-mer features for prediction.
  -Unzip into: Predict_newAssemblies/predict_newAssemblies/
 
 #### Run the Notebook
+
+
 ```bash
+python -m ipykernel install --user --name amr_prediction_env --display-name "Python (amr_prediction_env)"
 jupyter notebook
 ```
 
-#### Then open and run:
+#### Then open and run, selecting as kernel the amr_prediction_env:
 ```
 predict_newAssemblies.ipynb
 ```
