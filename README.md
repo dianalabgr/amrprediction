@@ -75,7 +75,7 @@ This pipeline has been tested and developed on the following setup:
 - **Python**: 3.9.12  
 - **R**: 4.2.2  
 - **Key Dependencies**:
-  - Python: `xgboost==2.0.3`, `scikit-learn==1.0.5`, `shap==0.46.0`, `pandas==2.0.3`, `numpy==1.21.5`, etc.
+  - Python: `xgboost==2.0.3`, `scikit-learn==1.0.2`, `shap==0.46.0`, `pandas==2.0.3`, `numpy==1.21.5`, etc.
   - R: `Biostrings`, `ggplot2`, `ComplexHeatmap`, etc.
   - Sequence analysis tools: `BLAST+ v2.15.0+`, `CD-HIT v4.8.1`
 
