@@ -28,12 +28,12 @@ GCA_016987635.1_PDT000967611.1_genomic.fna
 ### Download Dependencies
 
 - Download [`ProcessNewAssemblies_nedded_files.zip`](https://zenodo.org/record/16213507)
-- Unzip it in your home or working directory
+- Unzip it inside the annotate_newAssemblies directory
 
-### Create Required Subfolders
+### Create Required Subfolderss
 
 Go to:
-
+ss
 ~/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/
 
 
