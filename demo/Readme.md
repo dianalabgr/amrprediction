@@ -2,6 +2,17 @@
 
 This demo walks you through a complete example using a public **Escherichia coli** genome to predict its **in silico antibiogram** using the pipelines and models in this repository.
 
+##1 Download the repo and 
+Clone the repository:
+
+git clone https://github.com/dianalabgr/amrprediction.git
+cd amrprediction/Predict_NewAssemblies
+
+
+Create a Python environment (recommended):
+
+conda create -n amr_prediction_env python=3.12.7 conda activate amr_prediction_env pip install -r requirements/software_requirements.txt
+
 ---
 
 ## 1. Download and Prepare Inputs
