@@ -16,7 +16,7 @@ Create a Python Environment (Recommended)
 ```bash
 conda create -n amr_prediction_env python=3.12.7 
 conda activate amr_prediction_env 
-pip install -r requirements/software_requirements.txt
+pip install -r ../requirements/software_requirements.txt
 ```
 ---
 
