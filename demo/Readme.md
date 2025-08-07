@@ -135,11 +135,13 @@ Download [`models_and_shap_values.zip](https://zenodo.org/record/16213507)
 
 Unzip it into the folder: Predict_newAssemblies/predict_newAssemblies/
 
-📓 Run the Notebook
+📓 Run the Notebook predict_newAssemblies.ipynb
 
+bash 
 jupyter notebook
 
-    Open the notebook in predict_newAssemblies/
+
+    Open the notebook in predict_newAssemblies.ipynb
 
     Run all cells to:
 
