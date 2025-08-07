@@ -5,6 +5,7 @@ This demo walks you through a complete example using a public **Escherichia coli
 ---
 
 ## 1. Download and Prepare Inputs
+### Downlaod the github repo and specifically the folder Predict_NewAssemblies which will be your working directory 
 
 ### Download Genome Assembly (FASTA)
 
