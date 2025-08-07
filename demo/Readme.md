@@ -33,7 +33,6 @@ GCA_016987635.1_PDT000967611.1_genomic.fna
 ### Create Required Subfolderss
 
 Go to:
-ss
 ~/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/
 
 
@@ -59,6 +58,16 @@ Create these subfolders **(inside each folder)**:
 -Pseudomonas_aeruginosa/
 
 -Staphylococcus_aureus/
+
+bash 
+
+mkdir Acinetobacter_baumannii
+mkdir Enterobacter_cloacae
+mkdir Enterococcus_faecium
+mkdir Escherichia_coli
+mkdir Klebsiella_pneumoniae
+mkdir Pseudomonas_aeruginosa
+mkdir Staphylococcus_aureus
 
 
 ✅ You must create **all 7 species folders** inside **each `results_*` folder**.
