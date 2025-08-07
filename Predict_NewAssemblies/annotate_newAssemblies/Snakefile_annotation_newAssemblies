@@ -18,7 +18,7 @@ assembly_to_genus = {assembly: "Escherichia" for assembly in assemblies}
 
 rule all:
     input:
-        "/mnt/raid1b/kdan_data/Paper/annotation/ref_db/ref_db.pdb",
+        "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/annotation/ref_db/ref_db.pdb",
         expand("annotated_assemblies/results/{assembly}.txt", assembly=assemblies),
         expand("annotated_assemblies/results/{assembly}_filtered.txt", assembly=assemblies),
         expand("annotated_assemblies/upstream_seqs/{assembly}", assembly=assemblies),
@@ -37,11 +37,11 @@ rule all:
 #################################################
 rule blastx_routines:
     input:
-        "/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}"
+        "{assembly}"
     output:
         "annotated_assemblies/results/{assembly}.txt"
     params:
-        "/mnt/raid1b/kdan_data/Paper/annotation/ref_db/ref_db"
+        "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/annotation/ref_db/ref_db"
     threads:
         5
     log:
@@ -49,7 +49,7 @@ rule blastx_routines:
     resources:
         time=240  # Allocate 7200 seconds (2 hours) for this rule to run
     shell:
-       "/mnt/raid1b/kdan_data/Paper/tools/ncbi-blast-2.15.0+/bin/blastx -query {input} \
+       "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/tools/ncbi-blast-2.15.0+/bin/blastx -query {input} \
        -db {params} -outfmt \"6 std qseq sseq slen\" -evalue 1e-50 \
        -out {output} -num_threads {threads} 2> {log}"
 
@@ -59,13 +59,13 @@ rule blastx_routines:
 #################################################
 rule keep_best_matching:
     input:
-        script="/mnt/raid1b/kdan_data/Paper/scripts/keep_best_matching_new.py",
-        fasta="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}",
+        script="/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/keep_best_matching_new.py",
+        fasta="{assembly}",
         results="annotated_assemblies/results/{assembly}.txt",
     output:
         "annotated_assemblies/results/{assembly}_filtered.txt"
     params:
-        db="/mnt/raid1b/kdan_data/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+        db="/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/annotation/annotation/all_proteins_cdhit.fasta"
     log:
         "logs/filter_matches/{assembly}.log"
     shell:
@@ -77,8 +77,8 @@ rule keep_best_matching:
 #################################################
 rule get_upstream_sequences:
     input:
-        script = "/mnt/raid1b/kdan_data/Paper/scripts/get_upstream_seqs.R",
-        assembly = "/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}",
+        script = "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/get_upstream_seqs.R",
+        assembly = "{assembly}",
         coordinates = "annotated_assemblies/results/{assembly}_filtered.txt"
     output:
         dna  = "annotated_assemblies/upstream_seqs/{assembly}",
@@ -97,83 +97,83 @@ rule get_upstream_sequences:
 rule add_missing_records_upstream:
     input:
         "annotated_assemblies/upstream_seqs/{assembly}",
-        "/mnt/raid1b/kdan_data/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+        "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/annotation/annotation/all_proteins_cdhit.fasta"
     output:
         "annotated_assemblies/upstream_seqs_final/{assembly}"
     log:
         script="logs/add_missing_records_upstream/{assembly}.txt"
     script:
-       "/mnt/raid1b/kdan_data/Paper/scripts/add_empty_records_upstreams.py"
+       "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/add_empty_records_upstreams.py"
 
 # For proteins alignments
 rule add_missing_records_proteins:
     input:
         "annotated_assemblies/aligned_proteins/{assembly}",
-        "/mnt/raid1b/kdan_data/Paper/annotation/annotation/all_proteins_cdhit.fasta"
+        "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/annotation/annotation/all_proteins_cdhit.fasta"
     output:
         "annotated_assemblies/aligned_proteins_final/{assembly}"
     log:
         script="logs/add_missing_fasta2/{assembly}.txt"
     script:
-       "/mnt/raid1b/kdan_data/Paper/scripts/add_empty_records_proteins.py"
+       "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/add_empty_records_proteins.py"
 
 
 # Make blastn between assemblies and each database of 5S rRNA genes
 rule blastn_routines_5S_assembly:
     input:
-        assembly="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}"
+        assembly="{assembly}"
     output:
         rRNA_seq="annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt"
     params:
         genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
-        reference_dir="/mnt/raid1b/kdan_data/Paper/annotation/annotation/rRNA_genes/results_5s/"
+        reference_dir="/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/results_5s/"
     threads:
         4
     log:
         "logs/blastn_routines_5S_assembly/{assembly}.txt"
     script:
-        "/mnt/raid1b/kdan_data/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/process_ribosomal_RNAs_newAssemblies.py"
         
 
 # Make blastn between assemblies and each database of 16S rRNA genes
 rule blastn_routines_16S_assembly:
     input:
-        assembly="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}"
+        assembly="{assembly}"
     output:
         rRNA_seq="annotated_assemblies/rRNAs/final_16s_seqs/{assembly}.txt"
     params:
         genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
-        reference_dir="/mnt/raid1b/kdan_data/Paper/annotation/annotation/rRNA_genes/results_16s/"
+        reference_dir="/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/results_16s/"
     threads:
         4
     log:
         "logs/blastn_routines_16S_assembly/{assembly}.txt"
     script:
-        "/mnt/raid1b/kdan_data/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/process_ribosomal_RNAs_newAssemblies.py"
         
         
 
 # Make blastn between assemblies and each database of 16S rRNA genes
 rule blastn_routines_23S_assembly:
     input:
-        assembly="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}"
+        assembly="{assembly}"
     output:
         rRNA_seq="annotated_assemblies/rRNAs/final_23s_seqs/{assembly}.txt"
     params:
         genus=lambda wildcards: assembly_to_genus.get(wildcards.assembly, "Unknown"),  # Get the genus from the dictionary
-        reference_dir="/mnt/raid1b/kdan_data/Paper/annotation/annotation/rRNA_genes/results_23s/"
+        reference_dir="/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/results_23s/"
     threads:
         4
     log:
         "logs/blastn_routines_23S_assembly/{assembly}.txt"
     script:
-        "/mnt/raid1b/kdan_data/Paper/scripts/process_ribosomal_RNAs_newAssemblies.py"
+        "/home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/process_ribosomal_RNAs_newAssemblies.py"
         
 
 #Find the kmers of the new assemblies 
 rule kmer_find_newAssemblies:
     input:
-        assembly="/mnt/raid1/argis/amr_ML/genomes_ncbi/genomes/{assembly}",
+        assembly="{assembly}",
         path_dna="annotated_assemblies/upstream_seqs_final/{assembly}",
         path_protein="annotated_assemblies/aligned_proteins_final/{assembly}",
         path_5s="annotated_assemblies/rRNAs/final_5s_seqs/{assembly}.txt",
@@ -187,7 +187,7 @@ rule kmer_find_newAssemblies:
         directory="kmers_Escherichia/",
     shell:
         """
-        python /mnt/raid1b/kdan_data/Paper/scripts/kmer_find_newAssemblies.py \
+        python /home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/kmer_find_newAssemblies.py \
         --assembly "{input.assembly}" \
         --kmer_size 3 \
         --path_dna "{input.path_dna}" \
@@ -197,7 +197,7 @@ rule kmer_find_newAssemblies:
         --path_23s "{input.path_23s}" \
         --directory "{params.directory}"
         
-        python /mnt/raid1b/kdan_data/Paper/scripts/kmer_find_newAssemblies.py \
+        python /home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/kmer_find_newAssemblies.py \
         --assembly "{input.assembly}" \
         --kmer_size 4 \
         --path_dna "{input.path_dna}" \
@@ -207,7 +207,7 @@ rule kmer_find_newAssemblies:
         --path_23s "{input.path_23s}" \
         --directory "{params.directory}"
         
-        python /mnt/raid1b/kdan_data/Paper/scripts/kmer_find_newAssemblies.py \
+        python /home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files/scripts/kmer_find_newAssemblies.py \
         --assembly "{input.assembly}" \
         --kmer_size 5 \
         --path_dna "{input.path_dna}" \
@@ -218,5 +218,4 @@ rule kmer_find_newAssemblies:
         --directory "{params.directory}"
         
         """
-
 
