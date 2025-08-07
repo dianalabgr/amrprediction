@@ -81,7 +81,7 @@ Open:
 ~/ProcessNewAssemblies_nedded_files/scripts/kmer_find_newAssemblies.py
 
 
-At **line 172**, replace the default hardcoded paths with:
+At **line 172**, replace the default hardcoded paths with your correct path that specifies where the folder ProcessNewAssemblies_nedded_files is located:
 
 ```python
 kmer_vocab_dna = np.load('~/ProcessNewAssemblies_nedded_files/Machine_Learning/build_dataset/data/kmer_'+str(kmer_size)+'_flatteneddna_stats_.npy', allow_pickle=True)
