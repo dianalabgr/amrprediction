@@ -16,7 +16,7 @@ This demo walks you through a complete example using a public **Escherichia coli
 
 ### Create Input File List
 
-In `annotate_newAssemblies/`, create a file called `Escherichia_files.txt` with:
+In `annotate_newAssemblies/`, change the file called `Escherichia_files.txt` to have only the following line (or the name of your assembly that you want to annotate):
 
 GCA_016987635.1_PDT000967611.1_genomic.fna
 
