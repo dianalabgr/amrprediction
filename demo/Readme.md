@@ -120,6 +120,7 @@ jupyter notebook
 ```
 predict_newAssemblies.ipynb
 ```
+In line 15 the script loads the created kmer profiles of the given genome, if you have used a different genome you should change the name, and also if you have used a genome of a different genus you should also change the folder (kmers_escherichia to kmers_{genus}) where the annotated kmers are saved.
 
 This will:
 
