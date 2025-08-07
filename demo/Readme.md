@@ -34,7 +34,7 @@ In `annotate_newAssemblies/`, change the file called `Escherichia_files.txt` to 
 
 GCA_016987635.1_PDT000967611.1_genomic.fna
 
-
+If you use a genome from another genera, then you should also change in the Snakefile_annotation_newAssemblies in the line 14 to put the corect genus. 
 ---
 
 ## 2. Prepare Annotation Resources
