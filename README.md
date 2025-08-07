@@ -92,13 +92,14 @@ This pipeline has been tested and developed on the following setup:
    ```bash
    git clone https://github.com/dianalabgr/amrprediction.git
    cd amrprediction
-   
+   ```
 Create a Python environment (recommended):
 
-conda create -n amr_prediction_env python=3.12.7
+ ```bash
+conda create -n amr_prediction_env python=3.9.12
 conda activate amr_prediction_env
 pip install -r requirements/software_requirements.txt
-
+```
 Install R packages:
 
 install.packages("BiocManager")
