@@ -133,7 +133,7 @@ This will annotate the genome and extract k-mer features for prediction.
 
 Download [`models_and_shap_values.zip](https://zenodo.org/record/16213507)
 
-Unzip it into the folder: predict_newAssemblies/
+Unzip it into the folder: Predict_newAssemblies/predict_newAssemblies/
 
 📓 Run the Notebook
 
