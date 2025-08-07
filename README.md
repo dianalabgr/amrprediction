@@ -65,7 +65,47 @@ This repository provides a **start-to-finish workflow** for genome-driven AMR pr
 from data collection → annotation → machine learning → clinical metagenomic validation.
 
 ---
+## 🖥️ System Requirements
 
+This pipeline has been tested and developed on the following setup:
+
+- **Operating System**: Ubuntu Linux 20.04.5 LTS  
+- **Python**: 3.12.7  
+- **R**: 4.2.2  
+- **Key Dependencies**:
+  - Python: `xgboost==2.0.3`, `scikit-learn==1.3.0`, `shap==0.46.0`, `pandas==2.0.3`, `numpy==1.21.5`, etc.
+  - R: `Biostrings`, `ggplot2`, `ComplexHeatmap`, etc.
+  - Sequence analysis tools: `BLAST+ v2.15.0+`, `CD-HIT v4.8.1`
+
+📄 Full package versions are listed in:
+- `requirements/software_requirements.txt`
+- `requirements/R_requirements.txt`
+
+🧠 No non-standard hardware is required, although ≥64 GB RAM is recommended for metagenomic assemblies and model training.
+
+---
+## ⚙️ Installation Instructions
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/dianalabgr/amrprediction.git
+   cd amrprediction
+   
+Create a Python environment (recommended):
+
+conda create -n amr_prediction_env python=3.12.7
+conda activate amr_prediction_env
+pip install -r requirements/software_requirements.txt
+
+Install R packages:
+
+install.packages("BiocManager")
+BiocManager::install(c("Biostrings", "ComplexHeatmap", "ggplot2"))
+
+
+💡 Typical installation time: 10–15 minutes on a standard 8-core desktop with 16 GB RAM.
+
+---
 ### 📜 License
 
 This project is under the **MIT License**.
