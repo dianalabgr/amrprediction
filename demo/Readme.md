@@ -37,15 +37,15 @@ or if you use a different genome, the name of your genome
 ---
 
 ## 3. Prepare Annotation Resources
-####Download Dependencies
+#### Download Dependencies
 
 -Download [`ProcessNewAssemblies_nedded_files.zip`](https://zenodo.org/record/16213507)
 
 -Unzip it into: annotate_newAssemblies/
 
-####Create Required Subfolders
+#### Create Required Subfolders
 
-####Navigate to: ~/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/
+#### Navigate to: ~/ProcessNewAssemblies_nedded_files/annotation/annotation/rRNA_genes/
 
 Inside each of the following folders:
 
@@ -55,7 +55,7 @@ Inside each of the following folders:
 
     results_5s/
 
-####Create the following subfolders:
+#### Create the following subfolders:
 ```bash
 mkdir Acinetobacter_baumannii
 mkdir Enterobacter_cloacae
@@ -71,7 +71,7 @@ mkdir Staphylococcus_aureus
 ---
 
 ## 4. Modify Paths in Scripts
-####Update k-mer Script Paths
+#### Update k-mer Script Paths
 
 Open:
 ```bash
@@ -84,7 +84,7 @@ kmer_vocab_protein = np.load('<your_path>/ProcessNewAssemblies_nedded_files/Mach
 kmer_vocab_rrna = np.load('<your_path>/ProcessNewAssemblies_nedded_files/Machine_Learning/build_dataset/data/kmer_'+str(kmer_size)+'_flattenedrrna_stats_.npy', allow_pickle=True)
 ```
 
-####Update Snakemake File
+#### Update Snakemake File
 
 -Open the snakemake file annotate_newAssemblies/Snakefile_annotation_newAssemblies
 
@@ -105,17 +105,17 @@ This will annotate the genome and extract k-mer features for prediction.
 ---
 
 ## 6. Predict the Antibiogram
-####Download Trained Models
+#### Download Trained Models
 
  -Download [`models_and_shap_values.zip](https://zenodo.org/record/16213507)
  -Unzip into: Predict_newAssemblies/predict_newAssemblies/
 
-####Run the Notebook
+#### Run the Notebook
 ```bash
 jupyter notebook
 ```
 
-####Then open and run:
+#### Then open and run:
 ```
 predict_newAssemblies.ipynb
 ```
