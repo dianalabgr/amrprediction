@@ -91,6 +91,16 @@ kmer_vocab_rrna = np.load('~/ProcessNewAssemblies_nedded_files/Machine_Learning/
 
 ---
 
+## 4. Modify the snakemake file 
+
+Open:
+
+~/annotate_newAssemblies/Snakefile_annotation_newAssemblies
+
+Replace the path for ProcessNewAssemblies_nedded_files to the full path in your local machine (e.g. my full path is /home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files)
+
+---
+
 ## 4. Run Annotation Pipeline
 
 Open a terminal and run:
