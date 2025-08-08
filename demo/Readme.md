@@ -88,7 +88,7 @@ kmer_vocab_rrna = np.load('<your_path>/ProcessNewAssemblies_nedded_files/Machine
 
 -Open the snakemake file annotate_newAssemblies/Snakefile_annotation_newAssemblies
 
--Replace all instances of ProcessNewAssemblies_nedded_files with your full local path, for example:
+-Replace all instances of /home/argis/Desktop/pasteur/amr_prediction_project/paper/github/Demo/ProcessNewAssemblies_nedded_files with your full local path, for example:
 ```swift
 /home/youruser/path/to/ProcessNewAssemblies_nedded_files
 ```
