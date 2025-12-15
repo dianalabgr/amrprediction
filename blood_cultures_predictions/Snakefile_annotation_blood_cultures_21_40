@@ -63,7 +63,7 @@ rule blastx_routines:
 #################################################
 rule keep_best_matching:
     input:
-        script="/data/dorothy/Paper/scripts/keep_best_matching_final.py",
+        script="/data/dorothy/Paper/scripts/keep_best_matching_new.py",
         fasta="/data/dorothy/amr_ML/petinaki_bc/blood_assemblies_21_40/{assembly}.fasta",
         results="annotated_assemblies/results/{assembly}.txt",
     output:
